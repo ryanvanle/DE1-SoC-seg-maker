@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 7-Segment Display (0=ON, 1=OFF, Custom Indexing)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for segment shapes and positioning */
+        .segment {
+            position: absolute;
+            background-color: #e5e7eb; /* gray-200 - OFF state */
+            border-radius: 0.25rem; /* rounded-sm */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem; /* text-xs */
+            color: #6b7280; /* gray-500 */
+            font-family: monospace;
+            border: 1px solid #d1d5db; /* gray-300 */
+        }
+        .segment:hover {
+            background-color: #d1d5db; /* gray-300 */
+        }
+        /* Style for the ON state (logical state 0) */
+        .segment.on {
+            background-color: #ef4444; /* red-500 */
+            border-color: #dc2626; /* red-600 */
+            color: white;
+        }
+        .segment.on:hover {
+            background-color: #dc2626; /* red-600 */
+        }
+
+        /* Segment dimensions and positions (Visual layout remains the same) */
+        .segment-a { top: 0;    left: 10px; width: 50px; height: 10px; } /* Top */
+        .segment-b { top: 10px; left: 60px; width: 10px; height: 50px; } /* Top-Right */
+        .segment-c { top: 70px; left: 60px; width: 10px; height: 50px; } /* Bottom-Right */
+        .segment-d { top: 120px;left: 10px; width: 50px; height: 10px; } /* Bottom */
+        .segment-e { top: 70px; left: 0;    width: 10px; height: 50px; } /* Bottom-Left */
+        .segment-f { top: 10px; left: 0;    width: 10px; height: 50px; } /* Top-Left */
+        .segment-g { top: 60px; left: 10px; width: 50px; height: 10px; } /* Middle */
+
+        /* Container for the display */
+        .display-container {
+            position: relative;
+            width: 70px;  /* Adjust based on segment dimensions */
+            height: 130px; /* Adjust based on segment dimensions */
+            margin: 2rem auto; /* Center the display */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans flex flex-col items-center justify-center min-h-screen p-4">
+
+    <h1 class="text-2xl font-bold mb-6 text-gray-700">7-Segment Display Simulator (0=ON, 1=OFF, Custom Indexing)</h1>
+
+    <div class="display-container mb-6">
+        <div class="segment segment-a" data-index="6">6</div>
+        <div class="segment segment-b" data-index="5">5</div>
+        <div class="segment segment-c" data-index="4">4</div>
+        <div class="segment segment-d" data-index="3">3</div>
+        <div class="segment segment-e" data-index="2">2</div>
+        <div class="segment segment-f" data-index="1">1</div>
+        <div class="segment segment-g" data-index="0">0</div>
+    </div>
+
+    <div class="text-center">
+        <label for="output" class="block text-lg font-medium text-gray-600 mb-2">7'b Output (Segments 0-6):</label>
+        <input type="text" id="output" readonly
+               class="w-48 p-2 border border-gray-300 rounded-md text-center font-mono text-xl bg-white shadow-sm">
+    </div>
+
+    <script>
+        // Get all segment elements
+        const segments = document.querySelectorAll('.segment');
+        // Get the output input element
+        const outputElement = document.getElementById('output');
+
+        // Initialize segment states (1 = OFF, 0 = ON) for indices 0 through 6
+        // Start with all segments OFF
+        const segmentStates = [1, 1, 1, 1, 1, 1, 1]; // Index 0=g, 1=f, 2=e, 3=d, 4=c, 5=b, 6=a
+
+        // Function to update the visual state of a segment and the output string
+        function updateDisplay() {
+            // Update individual segment appearance based on its assigned data-index
+            segments.forEach(segment => {
+                const index = parseInt(segment.dataset.index); // Get the segment's assigned output index (0-6)
+                // Apply 'on' class if state at that index is 0 (ON)
+                if (segmentStates[index] === 0) {
+                    segment.classList.add('on');
+                } else {
+                    // Remove 'on' class if state at that index is 1 (OFF)
+                    segment.classList.remove('on');
+                }
+            });
+
+            // Update the output string in 7'b format (reflects the 0/1 state for indices 0-6)
+            outputElement.value = "7'b" + segmentStates.join(''); // Join the array elements (indices 0-6) into a string
+        }
+
+        // Add click event listeners to each segment
+        segments.forEach(segment => {
+            segment.addEventListener('click', () => {
+                // Get the output index associated with the clicked visual segment
+                const index = parseInt(segment.dataset.index);
+
+                // Toggle the state for that specific index (0 becomes 1, 1 becomes 0)
+                segmentStates[index] = 1 - segmentStates[index];
+
+                // Update the display based on the new states
+                updateDisplay();
+            });
+        });
+
+        // Initial display update on page load (all segments start OFF)
+        updateDisplay();
+    </script>
+
+</body>
+</html>
+
